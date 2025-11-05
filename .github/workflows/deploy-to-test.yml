@@ -29,30 +29,38 @@ jobs:
           pip install databricks-cli
 
       # ----------------------------------------------------------
-      # 3️⃣ Authentification via variables d’environnement
+      # 3️⃣ Authentification Databricks TEST
       # ----------------------------------------------------------
-      - name: 🔐 Set environment variables for Databricks TEST
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_TEST }}
+      - name: 🔐 Configure Databricks CLI for TEST
         run: |
-          echo "Connexion établie à Databricks TEST"
-          export DATABRICKS_HOST=${DATABRICKS_HOST}
-          export DATABRICKS_TOKEN=${DATABRICKS_TOKEN}
+          mkdir -p ~/.databricks
+          echo "[DEFAULT]" > ~/.databricks/config
+          echo "host = $DATABRICKS_HOST_TEST" >> ~/.databricks/config
+          echo "token = $DATABRICKS_TOKEN_TEST" >> ~/.databricks/config
+          echo "✅ Configuration Databricks TEST créée"
 
-          echo "✅ Variables d'environnement configurées"
-
-          # Vérification de la connexion
-          databricks workspace ls /
+        env:
+          DATABRICKS_HOST_TEST: ${{ secrets.DATABRICKS_HOST_TEST }}
+          DATABRICKS_TOKEN_TEST: ${{ secrets.DATABRICKS_TOKEN_TEST }}
 
       # ----------------------------------------------------------
-      # 4️⃣ Déploiement des notebooks dans le workspace TEST
+      # 4️⃣ Vérification de la connexion
+      # ----------------------------------------------------------
+      - name: 🔎 Test Databricks connection
+        run: |
+          echo "Vérification de la connexion Databricks TEST..."
+          databricks workspace ls /
+          echo "✅ Connexion réussie à Databricks TEST"
+
+      # ----------------------------------------------------------
+      # 5️⃣ Déploiement des notebooks vers le workspace TEST
       # ----------------------------------------------------------
       - name: 🚀 Deploy notebooks to TEST
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_TEST }}
         run: |
           echo "Déploiement des notebooks dans /Shared/sncfdatalab ..."
           databricks workspace import_dir notebooks /Shared/sncfdatalab --overwrite
           echo "✅ Notebooks déployés avec succès sur Databricks TEST !"
+
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_TEST }}
