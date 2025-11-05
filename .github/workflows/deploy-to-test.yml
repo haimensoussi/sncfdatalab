@@ -1,0 +1,29 @@
+name: 🚀 Deploy to Databricks TEST (from main)
+
+on:
+  push:
+    branches:
+      - main    # 🔹 Déploiement déclenché uniquement quand main est mise à jour
+
+jobs:
+  deploy-to-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Set up Databricks CLI
+        uses: databricks/setup-cli@v1
+
+      - name: 🔐 Authenticate to Databricks TEST
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_TEST }}
+        run: |
+          echo "Connexion au workspace TEST : $DATABRICKS_HOST"
+
+      - name: 📦 Deploy notebooks to TEST
+        run: |
+          databricks workspace import_dir notebooks /Shared/sncfdatalab --overwrite
+          echo "✅ Déploiement réussi sur TEST."
