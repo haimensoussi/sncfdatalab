@@ -29,38 +29,17 @@ jobs:
           pip install databricks-cli
 
       # ----------------------------------------------------------
-      # 3️⃣ Authentification Databricks TEST
+      # 3️⃣ Tester la connexion et déployer les notebooks
       # ----------------------------------------------------------
-      - name: 🔐 Configure Databricks CLI for TEST
-        run: |
-          mkdir -p ~/.databricks
-          echo "[DEFAULT]" > ~/.databricks/config
-          echo "host = $DATABRICKS_HOST_TEST" >> ~/.databricks/config
-          echo "token = $DATABRICKS_TOKEN_TEST" >> ~/.databricks/config
-          echo "✅ Configuration Databricks TEST créée"
-
-        env:
-          DATABRICKS_HOST_TEST: ${{ secrets.DATABRICKS_HOST_TEST }}
-          DATABRICKS_TOKEN_TEST: ${{ secrets.DATABRICKS_TOKEN_TEST }}
-
-      # ----------------------------------------------------------
-      # 4️⃣ Vérification de la connexion
-      # ----------------------------------------------------------
-      - name: 🔎 Test Databricks connection
-        run: |
-          echo "Vérification de la connexion Databricks TEST..."
-          databricks workspace ls /
-          echo "✅ Connexion réussie à Databricks TEST"
-
-      # ----------------------------------------------------------
-      # 5️⃣ Déploiement des notebooks vers le workspace TEST
-      # ----------------------------------------------------------
-      - name: 🚀 Deploy notebooks to TEST
-        run: |
-          echo "Déploiement des notebooks dans /Shared/sncfdatalab ..."
-          databricks workspace import_dir notebooks /Shared/sncfdatalab --overwrite
-          echo "✅ Notebooks déployés avec succès sur Databricks TEST !"
-
+      - name: 🚀 Deploy notebooks to Databricks TEST
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_TEST }}
+        run: |
+          echo "Connexion à Databricks TEST..."
+          databricks workspace ls /
+          echo "✅ Connexion OK"
+
+          echo "Déploiement des notebooks vers /Shared/sncfdatalab ..."
+          databricks workspace import_dir notebooks /Shared/sncfdatalab --overwrite
+          echo "✅ Déploiement terminé avec succès !"
