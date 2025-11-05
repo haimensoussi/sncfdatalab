@@ -1,6 +1,7 @@
-name: 🚀 Deploy Notebooks to Databricks TEST (from main)
+name: 🚀 Deploy Notebooks to Databricks TEST (Direct Config)
 
 on:
+  workflow_dispatch:   # Exécution manuelle
   push:
     branches:
       - main
@@ -21,29 +22,12 @@ jobs:
       - name: 📦 Install Databricks CLI
         run: pip install databricks-cli
 
-      # 🔎 Étape de DEBUG : on vérifie que les secrets sont bien lus
-      - name: 🧩 Check secrets presence
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_TEST }}
-        run: |
-          if [ -z "$DATABRICKS_HOST" ]; then
-            echo "❌ ERREUR: DATABRICKS_HOST_TEST est vide !"
-            exit 1
-          fi
-          if [ -z "$DATABRICKS_TOKEN" ]; then
-            echo "❌ ERREUR: DATABRICKS_TOKEN_TEST est vide !"
-            exit 1
-          fi
-          echo "✅ Secrets correctement injectés."
-
-      # 🚀 Étape principale
       - name: 🚀 Deploy notebooks to Databricks TEST
         env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_TEST }}
+          DATABRICKS_HOST: https://adb-4050055950573191.11.azuredatabricks.net/
+          DATABRICKS_TOKEN: dapi268dc9598fccee0fbf998cd7b7b68381
         run: |
-          echo "Connexion à Databricks TEST..."
+          echo "Connexion directe à Databricks TEST..."
           databricks workspace ls /
           echo "✅ Connexion OK"
 
