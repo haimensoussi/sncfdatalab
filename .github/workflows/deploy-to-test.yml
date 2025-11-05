@@ -1,29 +1,52 @@
-name: 🚀 Deploy to Databricks TEST (from main)
+name: 🚀 Deploy Notebooks to Databricks TEST (from main)
 
 on:
   push:
     branches:
-      - main    # 🔹 Déploiement déclenché uniquement quand main est mise à jour
+      - main
 
 jobs:
   deploy-to-test:
     runs-on: ubuntu-latest
 
     steps:
+      # ----------------------------------------------------------
+      # 1️⃣ Cloner le dépôt
+      # ----------------------------------------------------------
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
-      - name: ⚙️ Set up Databricks CLI
-        uses: databricks/setup-cli@v1
+      # ----------------------------------------------------------
+      # 2️⃣ Installer Python et Databricks CLI
+      # ----------------------------------------------------------
+      - name: ⚙️ Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-      - name: 🔐 Authenticate to Databricks TEST
+      - name: 📦 Install Databricks CLI
+        run: |
+          pip install databricks-cli
+
+      # ----------------------------------------------------------
+      # 3️⃣ Authentification Databricks TEST
+      # ----------------------------------------------------------
+      - name: 🔐 Configure Databricks CLI for TEST
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_TEST }}
         run: |
-          echo "Connexion au workspace TEST : $DATABRICKS_HOST"
+          mkdir -p ~/.databricks
+          echo "[DEFAULT]" > ~/.databricks/config
+          echo "host = $DATABRICKS_HOST" >> ~/.databricks/config
+          echo "token = $DATABRICKS_TOKEN" >> ~/.databricks/config
+          echo "✅ Authentifié sur Databricks TEST"
 
-      - name: 📦 Deploy notebooks to TEST
+      # ----------------------------------------------------------
+      # 4️⃣ Déploiement des notebooks vers Databricks TEST
+      # ----------------------------------------------------------
+      - name: 🚀 Deploy notebooks to TEST
         run: |
+          echo "Déploiement des notebooks dans /Shared/sncfdatalab ..."
           databricks workspace import_dir notebooks /Shared/sncfdatalab --overwrite
-          echo "✅ Déploiement réussi sur TEST."
+          echo "✅ Notebooks déployés avec succès sur Databricks TEST !"
