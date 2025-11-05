@@ -10,27 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ----------------------------------------------------------
-      # 1️⃣ Cloner le dépôt GitHub
-      # ----------------------------------------------------------
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
-      # ----------------------------------------------------------
-      # 2️⃣ Installer Python et le Databricks CLI
-      # ----------------------------------------------------------
       - name: ⚙️ Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
       - name: 📦 Install Databricks CLI
-        run: |
-          pip install databricks-cli
+        run: pip install databricks-cli
 
-      # ----------------------------------------------------------
-      # 3️⃣ Tester la connexion et déployer les notebooks
-      # ----------------------------------------------------------
+      # 🔎 Étape de DEBUG : on vérifie que les secrets sont bien lus
+      - name: 🧩 Check secrets presence
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_TEST }}
+        run: |
+          if [ -z "$DATABRICKS_HOST" ]; then
+            echo "❌ ERREUR: DATABRICKS_HOST_TEST est vide !"
+            exit 1
+          fi
+          if [ -z "$DATABRICKS_TOKEN" ]; then
+            echo "❌ ERREUR: DATABRICKS_TOKEN_TEST est vide !"
+            exit 1
+          fi
+          echo "✅ Secrets correctement injectés."
+
+      # 🚀 Étape principale
       - name: 🚀 Deploy notebooks to Databricks TEST
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_TEST }}
