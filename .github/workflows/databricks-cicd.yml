@@ -1,0 +1,74 @@
+name: Databricks Multi-Environment CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+      - test
+      - prod
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Databricks Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@v1
+
+      # ---------------------------------------------------------
+      # 🌱 ENVIRONNEMENT DEV
+      # ---------------------------------------------------------
+      - name: Deploy to DEV environment
+        if: github.ref == 'refs/heads/dev'
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_DEV_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_DEV_TOKEN }}
+        run: |
+          echo "🚀 Déploiement vers Databricks DEV..."
+          databricks workspace import_dir notebooks /Workspace/DEV/notebooks --overwrite
+          databricks jobs deploy jobs/dev_job.json --force
+          echo "✅ Déploiement DEV terminé avec succès."
+
+      # ---------------------------------------------------------
+      # 🧪 ENVIRONNEMENT TEST
+      # ---------------------------------------------------------
+      - name: Deploy to TEST environment
+        if: github.ref == 'refs/heads/test'
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_TEST_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TEST_TOKEN }}
+        run: |
+          echo "🧪 Déploiement vers Databricks TEST..."
+          databricks workspace import_dir notebooks /Workspace/TEST/notebooks --overwrite
+          databricks jobs deploy jobs/test_job.json --force
+          echo "✅ Déploiement TEST terminé avec succès."
+
+      # ---------------------------------------------------------
+      # 🚀 ENVIRONNEMENT PROD
+      # ---------------------------------------------------------
+      - name: Deploy to PROD environment
+        if: github.ref == 'refs/heads/prod'
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_PROD_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_PROD_TOKEN }}
+        run: |
+          echo "🚀 Déploiement vers Databricks PROD..."
+          databricks workspace import_dir notebooks /Workspace/PROD/notebooks --overwrite
+          databricks jobs deploy jobs/prod_job.json --force
+          echo "✅ Déploiement PROD terminé avec succès."
+
+      # ---------------------------------------------------------
+      # 🏷️ BRANCHE MAIN (Release stable)
+      # ---------------------------------------------------------
+      - name: Create tagged release for MAIN
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "🏷️ Création d'une release stable sur MAIN..."
+          git tag "release-$(date +'%Y%m%d-%H%M')"
+          git push origin --tags
+          echo "✅ Tag de release créé et poussé sur GitHub."
