@@ -1,4 +1,4 @@
-name: 🚀 Deploy Notebooks to Databricks PROD (from main)
+name: 🚀 Deploy Notebooks to Databricks PROD
 
 on:
   push:
@@ -9,6 +9,10 @@ on:
 jobs:
   deploy-to-prod:
     runs-on: ubuntu-latest
+
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_PROD }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_PROD }}
 
     steps:
       - name: 📥 Checkout repository
@@ -22,11 +26,7 @@ jobs:
       - name: 📦 Install Databricks CLI
         run: pip install databricks-cli
 
-      # Vérification des secrets PROD
       - name: 🧩 Check secrets presence
-        env:
-          DATABRICKS_HOST: https://adb-690688979154426.6.azuredatabricks.net/
-          DATABRICKS_TOKEN: dapi66fd064472135d2030cf4e094435f203
         run: |
           if [ -z "$DATABRICKS_HOST" ]; then
             echo "❌ ERREUR: DATABRICKS_HOST_PROD est vide !"
@@ -37,16 +37,13 @@ jobs:
             exit 1
           fi
           echo "✅ Secrets PROD correctement injectés."
+          echo "Databricks Host : $DATABRICKS_HOST"
 
-      # Déploiement vers PROD
       - name: 🚀 Deploy notebooks to Databricks PROD
-        env:
-          DATABRICKS_HOST: https://adb-690688979154426.6.azuredatabricks.net/
-          DATABRICKS_TOKEN: dapi66fd064472135d2030cf4e094435f203
         run: |
           echo "Connexion à Databricks PROD..."
+          databricks configure --host "$DATABRICKS_HOST" --token "$DATABRICKS_TOKEN"
           databricks workspace ls /
-          echo "✅ Connexion OK"
 
           echo "Déploiement des notebooks vers /Shared/sncfdatalab_prod ..."
           databricks workspace import_dir notebooks /Shared/sncfdatalab_prod --overwrite
