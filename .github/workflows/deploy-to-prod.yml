@@ -25,8 +25,8 @@ jobs:
       # Vérification des secrets PROD
       - name: 🧩 Check secrets presence
         env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_PROD }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_PROD }}
+          DATABRICKS_HOST: https://adb-690688979154426.6.azuredatabricks.net/
+          DATABRICKS_TOKEN: dapi66fd064472135d2030cf4e094435f203
         run: |
           if [ -z "$DATABRICKS_HOST" ]; then
             echo "❌ ERREUR: DATABRICKS_HOST_PROD est vide !"
